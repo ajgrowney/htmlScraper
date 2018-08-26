@@ -61,7 +61,6 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
             tagStack->top()->insertNestedTag(tagName, newHtmlTag);
         }
         tagStack->push(newHtmlTag);
-
     }else{
         //---------Case: Closing Tag---------------------
         line_in.erase(0,1); // Erase '/'
@@ -78,7 +77,6 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
             cout << "\nExpected: "<< tagStack->top()->getTagName()<<endl;
             exit(1);
         }
-
     }
 }
 
@@ -87,17 +85,18 @@ void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
     scrapeDoc->addLine();
 
     int end_whitesapce = line_in.find_first_not_of(" \t");
-    line_in.erase(0,end_whitesapce);
 
     // Found the opening '<' for a tag
     if(end_whitesapce != -1){
-
+        line_in.erase(0,end_whitesapce);
         if(line_in.at(0) == '<'){
             // -------- Found a tag -------------
             parseTag(scrapeDoc, tagStack, line_in);
         }else{
             // ----------Found inner HTML-----------
-            tagStack->top()->addInnerContent(line_in);
+            if(!tagStack->empty()){
+                tagStack->top()->addInnerContent(line_in);
+            }
         }
     }
 }
