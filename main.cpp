@@ -1,10 +1,12 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <stack>
 #include <fstream>
 #include "HtmlDoc.hpp"
 #include "HtmlTag.hpp"
 using namespace std;
+
 
 void parseTag(HtmlDoc* scrapeDoc, string line_in){
     line_in.erase(0,1); // Get rid of '<'
@@ -58,7 +60,7 @@ void parseTag(HtmlDoc* scrapeDoc, string line_in){
 }
 
 // Assuming the line begins with a '<' 
-void parseLine(HtmlDoc* scrapeDoc, string line_in){
+void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*> tagStack, string line_in){
     scrapeDoc->addLine();
 
     int end_whitesapce = line_in.find_first_not_of(" \t");
@@ -72,29 +74,36 @@ void parseLine(HtmlDoc* scrapeDoc, string line_in){
 
 int main(int argc, char* argv[]){
 
+    //---------------Main Menu-----------------
     cout << "Welcome to Page Scraper\nA C++ HTML file scraper\n";
-    cout << "Enter the filename you would like to scrape from this directory: ";
+    cout << "\nEnter the filename you would like to scrape from this directory: ";
+    ifstream myfile;
     string file_in;
     cin >> file_in;
-    if(!file_in.empty()){
-        ifstream myfile;
-        myfile.open("helloworld.html");
-        if(!myfile.is_open()){
-            cout << "Error opening/finding the file\n";
-            exit(1);
-        }
-        cout << "Scraping: "<< file_in<<endl;
-        HtmlDoc* myDocument = new HtmlDoc();
-        string input;
-        while(getline(myfile, input)){
-            parseLine(myDocument, input);
-        }
+    myfile.open(file_in);
 
-        cout << "Document statistics of: "<< file_in << endl;
-        cout << "Num of Lines: "<< myDocument->getLines()<<endl;
-        cout << "Num of Tags: "<< myDocument->getDocTags().size()<<endl;
-        delete myDocument;
+    //---------------
+    while(!myfile.is_open()){
+        cout << "Must enter a valid filename. Try again: ";
+        cin >> file_in;
+        if(!file_in.empty()){
+            myfile.open(file_in);
+        }
     }
+    cout << "Scraping: "<< file_in<<endl;
+
+    HtmlDoc* myDocument = new HtmlDoc();
+    stack<HtmlTag*> tagStack;
+    string input;
+
+    while(getline(myfile, input)){
+        parseLine(myDocument, tagStack, input);
+    }
+
+    cout << "Document statistics of: "<< file_in << endl;
+    cout << "Num of Lines: "<< myDocument->getLines()<<endl;
+    cout << "Num of Tags: "<< myDocument->getDocTags().size()<<endl;
+    delete myDocument;
 
     return 0;
 }
