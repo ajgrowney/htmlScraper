@@ -77,9 +77,15 @@ void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
     line_in.erase(0,end_whitesapce);
 
     // Found the opening '<' for a tag
-    if(end_whitesapce != -1 && line_in.at(0) == '<'){
-        // -------- Found a tag -------------
-        parseTag(scrapeDoc, tagStack, line_in);
+    if(end_whitesapce != -1){
+
+        if(line_in.at(0) == '<'){
+            // -------- Found a tag -------------
+            parseTag(scrapeDoc, tagStack, line_in);
+        }else{
+            // ----------Found inner HTML-----------
+            tagStack->top()->addInnerContent(line_in);
+        }
     }
 }
 
@@ -133,6 +139,8 @@ int main(int argc, char* argv[]){
             multimap<string, HtmlTag*> allTags = myDocument->getDocTags();
             for(auto itr = allTags.begin(); itr != allTags.end(); itr++){
                 cout << "\nTag Name: "<< itr->second->getTagName()<<endl;
+
+                // Print out the attributes
                 multimap<string, string> attr_pairs = itr->second->getAttributes();
                 if(attr_pairs.size() > 0){
                     cout << "List of attribute pairs: \n";
@@ -142,6 +150,9 @@ int main(int argc, char* argv[]){
                 }else{
                     cout << "Contains no attributes\n";
                 }
+
+                // Print out the content
+                cout << "Inner content: \n-->"<< itr->second->getInnerContent()<<endl;
             }
         }else if(menuChoice == 4){
             cout << "Goodbye\n";

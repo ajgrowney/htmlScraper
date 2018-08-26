@@ -8,6 +8,7 @@ class HtmlTag {
     public:
         HtmlTag(string name){
             tag_name = name;
+            inner_content = "";
         };
 
         void insertAttribute(string attr_name, string attr_value){
@@ -18,8 +19,15 @@ class HtmlTag {
             nestedTags.insert({tag_name, nested_tag});
         }
 
+        void addInnerContent(string cont){
+            inner_content += cont;
+        }
+
         string getTagName(){
             return tag_name;
+        }
+        string getInnerContent(){
+            return inner_content;
         }
         multimap<string,string> getAttributes(){
             return attributes;
@@ -29,6 +37,7 @@ class HtmlTag {
         }
     private:
         string tag_name;
+        string inner_content;
         multimap<string,string> attributes;
         multimap<string, HtmlTag*> nestedTags;
 };
