@@ -7,6 +7,16 @@
 #include "HtmlTag.hpp"
 using namespace std;
 
+void printMenu(){
+        cout << "\nSelect a menu option\n";
+        cout << "1) View number of lines total\n";
+        cout << "2) View number of tags in document\n";
+        cout << "3) View all tags with information\n";
+        cout << "4) View specific element detail\n";
+        cout << "5) View specific attribute value\n";
+        cout << "6) Exit the program\n";
+        cout << "Select: ";
+}
 
 void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
     line_in.erase(0,1); // Get rid of '<'
@@ -46,6 +56,9 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
                 newHtmlTag->insertAttribute(attrName, attrVal);
             }
             delim_loc = line_in.find_first_of(" >");
+        }
+        if(!tagStack->empty()){
+            tagStack->top()->insertNestedTag(tagName, newHtmlTag);
         }
         tagStack->push(newHtmlTag);
 
@@ -123,13 +136,8 @@ int main(int argc, char* argv[]){
     TODO: Select a specific tag and view details of it
     */
     int menuChoice = 0;
-    while(menuChoice != 4){
-        cout << "\nSelect a menu option\n";
-        cout << "1) View number of lines total\n";
-        cout << "2) View number of tags in document\n";
-        cout << "3) View specific tag\n";
-        cout << "4) Exit the program\n";
-        cout << "Select: ";
+    while(menuChoice != 6){
+        printMenu();
         cin >> menuChoice;
         if(menuChoice == 1){
             cout << "Num of Lines: "<< myDocument->getLines()<<endl;
@@ -151,10 +159,25 @@ int main(int argc, char* argv[]){
                     cout << "Contains no attributes\n";
                 }
 
+                // Print out nested tag names
+                multimap<string, HtmlTag*> nested_tags = itr->second->getNestedTags();
+                if(nested_tags.size() > 0){
+                    cout << "List of nested tags: \n";
+                    for(auto nest_itr = nested_tags.begin(); nest_itr != nested_tags.end(); nest_itr++){
+                        cout << "--> Nested Tag Name: "<< nest_itr->second->getTagName()<<endl;
+                    }
+                }else{
+                    cout << "Contains no nested tags\n";
+                }
+
                 // Print out the content
                 cout << "Inner content: \n-->"<< itr->second->getInnerContent()<<endl;
             }
         }else if(menuChoice == 4){
+
+        }else if(menuChoice == 5){
+
+        }else if(menuChoice == 6){
             cout << "Goodbye\n";
         }
 
