@@ -16,7 +16,7 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
 
     //-------------Case: Opening Tag-------------------
     if(isOpeningTag){
-        cout << "Found Opening Tag: " << line_in.substr(0, line_in.find('>')) << "\n";
+        //cout << "Found Opening Tag: " << line_in.substr(0, line_in.find('>')) << "\n";
         
         // Find first delimiter
         int delim_loc = line_in.find_first_of(" >");
@@ -56,7 +56,7 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
 
         //---------Matches the correct tag----------------
         if(tagStack->top()->getTagName() == closeTagName){
-            cout << "Valid closing tag: "<< closeTagName <<endl;
+            //cout << "Valid closing tag: "<< closeTagName <<endl;
             scrapeDoc->insertDocumentTag(closeTagName, tagStack->top());
             tagStack->pop();
         }else{
@@ -130,7 +130,19 @@ int main(int argc, char* argv[]){
         }else if(menuChoice == 2){
             cout << "Num of Tags: "<< myDocument->getDocTags().size()<<endl;
         }else if(menuChoice == 3){
-            cout << "Under construction\n";
+            multimap<string, HtmlTag*> allTags = myDocument->getDocTags();
+            for(auto itr = allTags.begin(); itr != allTags.end(); itr++){
+                cout << "\nTag Name: "<< itr->second->getTagName()<<endl;
+                multimap<string, string> attr_pairs = itr->second->getAttributes();
+                if(attr_pairs.size() > 0){
+                    cout << "List of attribute pairs: \n";
+                    for(auto attr_itr = attr_pairs.begin(); attr_itr != attr_pairs.end(); attr_itr++){
+                        cout << "--> Attr: "<<attr_itr->first << ", Val: "<< attr_itr->second<<endl;
+                    }
+                }else{
+                    cout << "Contains no attributes\n";
+                }
+            }
         }else if(menuChoice == 4){
             cout << "Goodbye\n";
         }
