@@ -8,7 +8,7 @@
 using namespace std;
 
 
-void parseTag(HtmlDoc* scrapeDoc, string line_in){
+void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
     line_in.erase(0,1); // Get rid of '<'
 
     // Determine if Opening or Closing tag
@@ -30,7 +30,7 @@ void parseTag(HtmlDoc* scrapeDoc, string line_in){
             if(line_in.at(0) == '>'){
                 // End of Opening Tag: '>'
                 line_in.erase(0,1); //Erase the delimiter
-            }else{
+            }else if(line_in.at(0) == ' '){
                 // Found Space: contains attribute
                 line_in.erase(0,1); // Erase the space
 
@@ -47,20 +47,30 @@ void parseTag(HtmlDoc* scrapeDoc, string line_in){
             }
             delim_loc = line_in.find_first_of(" >");
         }
-
-        scrapeDoc->insertDocumentTag(tagName, newHtmlTag);
+        tagStack->push(newHtmlTag);
 
     }else{
         //---------Case: Closing Tag---------------------
         line_in.erase(0,1); // Erase '/'
-        cout << "Found Closing Tag: " << line_in.substr(0, line_in.find('>')) << "\n";
-        // Found a closing tag
+        string closeTagName = line_in.substr(0, line_in.find('>'));
+
+        //---------Matches the correct tag----------------
+        if(tagStack->top()->getTagName() == closeTagName){
+            cout << "Valid closing tag: "<< closeTagName <<endl;
+            scrapeDoc->insertDocumentTag(closeTagName, tagStack->top());
+            tagStack->pop();
+        }else{
+            cout << "Invalid  closing tag!";
+            cout << "\nFound: "<< closeTagName;
+            cout << "\nExpected: "<< tagStack->top()->getTagName()<<endl;
+            exit(1);
+        }
 
     }
 }
 
 // Assuming the line begins with a '<' 
-void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*> tagStack, string line_in){
+void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
     scrapeDoc->addLine();
 
     int end_whitesapce = line_in.find_first_not_of(" \t");
@@ -68,7 +78,8 @@ void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*> tagStack, string line_in){
 
     // Found the opening '<' for a tag
     if(end_whitesapce != -1 && line_in.at(0) == '<'){
-        parseTag(scrapeDoc, line_in);
+        // -------- Found a tag -------------
+        parseTag(scrapeDoc, tagStack, line_in);
     }
 }
 
@@ -93,7 +104,7 @@ int main(int argc, char* argv[]){
     cout << "Scraping: "<< file_in<<endl;
 
     HtmlDoc* myDocument = new HtmlDoc();
-    stack<HtmlTag*> tagStack;
+    stack<HtmlTag*>* tagStack = new stack<HtmlTag*>();
     string input;
 
     while(getline(myfile, input)){

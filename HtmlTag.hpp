@@ -17,6 +17,10 @@ class HtmlTag {
         void insertNestedTag(string tag_name, HtmlTag* nested_tag){
             nestedTags.insert({tag_name, nested_tag});
         }
+
+        string getTagName(){
+            return tag_name;
+        }
         multimap<string,string> getAttributes(){
             return attributes;
         }
