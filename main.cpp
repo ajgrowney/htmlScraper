@@ -111,10 +111,33 @@ int main(int argc, char* argv[]){
         parseLine(myDocument, tagStack, input);
     }
 
-    cout << "Document statistics of: "<< file_in << endl;
-    cout << "Num of Lines: "<< myDocument->getLines()<<endl;
-    cout << "Num of Tags: "<< myDocument->getDocTags().size()<<endl;
-    delete myDocument;
 
+    /*
+    ---------Interactive Menu Choices-----------------
+    TODO: Select a specific tag and view details of it
+    */
+    int menuChoice = 0;
+    while(menuChoice != 4){
+        cout << "\nSelect a menu option\n";
+        cout << "1) View number of lines total\n";
+        cout << "2) View number of tags in document\n";
+        cout << "3) View specific tag\n";
+        cout << "4) Exit the program\n";
+        cout << "Select: ";
+        cin >> menuChoice;
+        if(menuChoice == 1){
+            cout << "Num of Lines: "<< myDocument->getLines()<<endl;
+        }else if(menuChoice == 2){
+            cout << "Num of Tags: "<< myDocument->getDocTags().size()<<endl;
+        }else if(menuChoice == 3){
+            cout << "Under construction\n";
+        }else if(menuChoice == 4){
+            cout << "Goodbye\n";
+        }
+
+    }
+
+    delete myDocument;
+    delete tagStack;
     return 0;
 }
