@@ -7,13 +7,13 @@
 using namespace std;
 
 
-
+// Assuming the line begins with a '<' 
 void parseLine(HtmlDoc* scrapeDoc, string line_in){
-
     scrapeDoc->addLine();
 
     int tag_loc = line_in.find_first_of("<");
     line_in.erase(0,tag_loc);
+
     if(tag_loc != -1){
         line_in.erase(0,1); // Get rid of '<'
 
@@ -28,20 +28,18 @@ void parseLine(HtmlDoc* scrapeDoc, string line_in){
             int delim_loc = line_in.find_first_of(" >");
 
             // Create an object for the opening tag for mapping
-            scrapeDoc->addDivTag();
             string tagName = line_in.substr(0,delim_loc);
             HtmlTag* newHtmlTag = new HtmlTag(tagName);
 
             while(delim_loc != -1){
                 line_in.erase(0,delim_loc); // Erase tag name up to delimiter
                 if(line_in.at(0) == '>'){
-                    // End of Opening Tag
-                    cout << "Found >\n";
+                    // End of Opening Tag: '>'
                     line_in.erase(0,1); //Erase the delimiter
                 }else{
-                    // Contains attributes
-                    cout << "Found space\n";
-                    line_in.erase(0,1);
+                    // Found Space: contains attribute
+                    line_in.erase(0,1); // Erase the space
+
                     string attrName, attrVal;
                     int endAttrName = line_in.find_first_of(" =");
                     attrName = line_in.substr(0,endAttrName);
@@ -50,9 +48,8 @@ void parseLine(HtmlDoc* scrapeDoc, string line_in){
                     line_in.erase(0,beginAttrVal+1);
                     int endAttrVal = line_in.find_first_of('"');
                     attrVal = line_in.substr(0,endAttrVal);
+
                     newHtmlTag->insertAttribute(attrName, attrVal);
-                    cout << "Inserting attribute: "<<attrName<<","<<attrVal<<endl;
-                    cout << "After Insert Attribute: "<< line_in<<endl;
                 }
                 delim_loc = line_in.find_first_of(" >");
             }
@@ -91,7 +88,7 @@ int main(int argc, char* argv[]){
 
         cout << "Document statistics of: "<< file_in << endl;
         cout << "Num of Lines: "<< myDocument->getLines()<<endl;
-        cout << "Num of Tags: "<< myDocument->getNumTags()<<endl;
+        cout << "Num of Tags: "<< myDocument->getDocTags().size()<<endl;
         delete myDocument;
     }
 

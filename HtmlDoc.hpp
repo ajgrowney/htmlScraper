@@ -8,7 +8,6 @@ using namespace std;
 class HtmlDoc{
     public:
         HtmlDoc(){
-            num_div_tags = 0;
             num_lines = 0;
         }
         void addLine(){
@@ -17,11 +16,8 @@ class HtmlDoc{
         int getLines(){
             return num_lines;
         }
-        void addDivTag(){
-            num_div_tags++;
-        }
         int getNumTags(){
-            return num_div_tags;
+            return documentTags.size();
         }
         void insertDocumentTag(string tag_name, HtmlTag* tag){
             documentTags.insert({tag_name, tag});
@@ -30,7 +26,6 @@ class HtmlDoc{
             return documentTags;
         }
     private:
-        int num_div_tags;
         int num_lines;
         multimap<string, HtmlTag*> documentTags;
 };
