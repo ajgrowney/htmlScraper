@@ -2,13 +2,13 @@
 #define HTMLTAG_HPP
 #include <string>
 #include <map>
+#include <list>
 using namespace std;
 
 class HtmlTag {
     public:
         HtmlTag(string name){
             tag_name = name;
-            inner_content = "";
         };
 
         void insertAttribute(string attr_name, string attr_value){
@@ -20,13 +20,13 @@ class HtmlTag {
         }
 
         void addInnerContent(string cont){
-            inner_content += cont;
+            inner_content.push_back(cont);
         }
 
         string getTagName(){
             return tag_name;
         }
-        string getInnerContent(){
+        list<string> getInnerContent(){
             return inner_content;
         }
         multimap<string,string> getAttributes(){
@@ -37,7 +37,7 @@ class HtmlTag {
         }
     private:
         string tag_name;
-        string inner_content;
+        list<string> inner_content;
         multimap<string,string> attributes;
         multimap<string, HtmlTag*> nestedTags;
 };

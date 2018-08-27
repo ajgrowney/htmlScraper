@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <stack>
+#include <list>
 #include <fstream>
 #include "HtmlDoc.hpp"
 #include "HtmlTag.hpp"
@@ -18,15 +19,15 @@ void printMenu(){
         cout << "Select: ";
 }
 
-void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
+string parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
     line_in.erase(0,1); // Get rid of '<'
 
     // Determine if Opening or Closing tag
     bool isOpeningTag = (line_in.at(0) == '/') ? false : true;
+    bool end_of_tag = false;
 
     //-------------Case: Opening Tag-------------------
     if(isOpeningTag){
-        //cout << "Found Opening Tag: " << line_in.substr(0, line_in.find('>')) << "\n";
         
         // Find first delimiter
         int delim_loc = line_in.find_first_of(" >");
@@ -35,11 +36,12 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
         string tagName = line_in.substr(0,delim_loc);
         HtmlTag* newHtmlTag = new HtmlTag(tagName);
 
-        while(delim_loc != -1){
+        while(delim_loc != -1 && !end_of_tag){
             line_in.erase(0,delim_loc); // Erase tag name up to delimiter
             if(line_in.at(0) == '>'){
                 // End of Opening Tag: '>'
                 line_in.erase(0,1); //Erase the delimiter
+                end_of_tag = true;
             }else if(line_in.at(0) == ' '){
                 // Found Space: contains attribute
                 line_in.erase(0,1); // Erase the space
@@ -61,6 +63,8 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
             tagStack->top()->insertNestedTag(tagName, newHtmlTag);
         }
         tagStack->push(newHtmlTag);
+        cout << "Remaining line in: "<<line_in<<endl;
+        return line_in;
     }else{
         //---------Case: Closing Tag---------------------
         line_in.erase(0,1); // Erase '/'
@@ -71,6 +75,9 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
             //cout << "Valid closing tag: "<< closeTagName <<endl;
             scrapeDoc->insertDocumentTag(closeTagName, tagStack->top());
             tagStack->pop();
+            // Return remaining line after the '>' character for further parsing
+            line_in.erase(0, line_in.find('>')+1); // Erase the closing tag and return remaining string
+            return line_in;
         }else{
             cout << "Invalid  closing tag!";
             cout << "\nFound: "<< closeTagName;
@@ -78,6 +85,7 @@ void parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
             exit(1);
         }
     }
+    return "";
 }
 
 // Assuming the line begins with a '<' 
@@ -86,20 +94,28 @@ void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
 
     int end_whitesapce = line_in.find_first_not_of(" \t");
 
-    // Found the opening '<' for a tag
     if(end_whitesapce != -1){
-        line_in.erase(0,end_whitesapce);
-        if(line_in.at(0) == '<'){
-            // -------- Found a tag -------------
-            // Parse to determine open or closing tag and handle
-            parseTag(scrapeDoc, tagStack, line_in);
-        }else{
-            // ----------Found inner HTML-----------
-            if(!tagStack->empty()){
-                // Add the inner html to the current tag on the top of the stack
+
+        line_in.erase(0,end_whitesapce); // Erase whitespace before meaningful content
+
+        while(line_in.length() > 0){
+            int tag_loc = line_in.find_first_of('<');
+
+            if(tag_loc == -1 && !tagStack->empty()){
+                // No tags in the line, add the whole line to top of stack content
                 tagStack->top()->addInnerContent(line_in);
+                line_in.erase(0,line_in.length());
+            }else if(tag_loc != -1){
+                // A tag exists somewhere in the line
+                if(!tagStack->empty() && tag_loc !=0){
+                    tagStack->top()->addInnerContent(line_in.substr(0,tag_loc)); // Add all up to the tag
+                }
+                line_in.erase(0,tag_loc);
+                line_in = parseTag(scrapeDoc, tagStack, line_in);
             }
         }
+
+
     }
 }
 
@@ -172,7 +188,9 @@ int main(int argc, char* argv[]){
                 }
 
                 // Print out the content
-                cout << "Inner content: \n-->"<< itr->second->getInnerContent()<<endl;
+                list<string> inner_content = itr->second->getInnerContent();
+                cout << "Inner content: \n";
+                for(auto v: inner_content) cout << "-->"<< v << endl;
             }
         }else if(menuChoice == 4){
 
