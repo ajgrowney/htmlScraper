@@ -130,6 +130,55 @@ void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
     }
 }
 
+void processTagRequest(HtmlDoc* doc, string req){
+    multimap<string, HtmlTag*> docTags = doc->getDocTags();
+    multimap<string, HtmlTag*>::iterator attr_itr;
+    multimap<string, string>::iterator val_itr;
+    HtmlTag* currentTag = nullptr;
+
+    int delim_loc = req.find_first_of(".~");
+    if(delim_loc == -1){
+        cout << "Invalid request\n";
+        return;
+    }
+    string tag_name = req.substr(0, delim_loc);
+    req.erase(0,delim_loc);
+    attr_itr = docTags.find(tag_name);
+    if(attr_itr == docTags.end()){
+        cout << "Not Found!\n";
+        return;
+    }else{
+        currentTag = attr_itr->second;
+    }
+
+    while(req.at(0) == '.'){
+        req.erase(0,1);
+        delim_loc = req.find_first_of(".~");
+        attr_itr = currentTag->getNestedTags().find(req.substr(0, delim_loc));
+        if(attr_itr == currentTag->getNestedTags().end()){
+            cout << "Not Found!\n";
+            return;
+        }else{
+            currentTag = attr_itr->second;
+            req.erase(0, delim_loc);
+        }
+    }
+    if(req.at(0) != '~'){
+        cout << "Invalid syntax\n";
+    }else{
+        req.erase(0,1);
+        val_itr = currentTag->getAttributes().find(req);
+        if(val_itr == currentTag->getAttributes().end()){
+            cout << "Not Found!\n";
+        }else{
+            cout << val_itr->second<<endl;
+        }
+    }
+    
+
+
+}
+
 int main(int argc, char* argv[]){
 
     //---------------Main Menu-----------------
@@ -166,6 +215,7 @@ int main(int argc, char* argv[]){
     int menuChoice = 0;
     while(menuChoice != 6){
         printMenu();
+        cin.clear();
         cin >> menuChoice;
         if(menuChoice == 1){
             cout << "Num of Lines: "<< myDocument->getLines()<<endl;
@@ -215,7 +265,7 @@ int main(int argc, char* argv[]){
                 cout << "Enter a non-empty request: ";
                 cin >> find_attr;
             }
-            int delim_loc = find_attr.find_first_of(".~");
+            processTagRequest(myDocument, find_attr);
             
 
         }else if(menuChoice == 6){
