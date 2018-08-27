@@ -44,18 +44,30 @@ string parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
                 end_of_tag = true;
             }else if(line_in.at(0) == ' '){
                 // Found Space: contains attribute
-                line_in.erase(0,1); // Erase the space
-
                 string attrName, attrVal;
-                int endAttrName = line_in.find_first_of(" =");
-                attrName = line_in.substr(0,endAttrName);
-                line_in.erase(0,endAttrName);
-                int beginAttrVal = line_in.find_first_of('"');
-                line_in.erase(0,beginAttrVal+1);
-                int endAttrVal = line_in.find_first_of('"');
-                attrVal = line_in.substr(0,endAttrVal);
+                int beginAttrName = line_in.find_first_not_of(' ');
+                line_in.erase(0,beginAttrName); // Erase the space(s)
 
-                newHtmlTag->insertAttribute(attrName, attrVal);
+                int endAttrName = line_in.find_first_of(" =");
+
+                if(endAttrName != -1){
+                    attrName = line_in.substr(0,endAttrName);
+                    line_in.erase(0,endAttrName);
+                    int beginAttrVal = line_in.find_first_of('"');
+                    if(line_in.substr(0, beginAttrVal).find('=') == string::npos){
+                        cout << "Invalid attribute: No assignment\n";
+                    }else{
+                        line_in.erase(0, beginAttrVal+1);
+                        int endAttrVal = line_in.find_first_of('"');
+                        attrVal = line_in.substr(0,endAttrVal);
+                        newHtmlTag->insertAttribute(attrName, attrVal);
+                        line_in.erase(0,endAttrVal);
+                    }
+
+                }else{
+                    cout << "Invalid attribute error\n";
+                }
+
             }
             delim_loc = line_in.find_first_of(" >");
         }
@@ -63,7 +75,6 @@ string parseTag(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
             tagStack->top()->insertNestedTag(tagName, newHtmlTag);
         }
         tagStack->push(newHtmlTag);
-        cout << "Remaining line in: "<<line_in<<endl;
         return line_in;
     }else{
         //---------Case: Closing Tag---------------------
