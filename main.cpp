@@ -91,10 +91,12 @@ void parseLine(HtmlDoc* scrapeDoc, stack<HtmlTag*>* tagStack, string line_in){
         line_in.erase(0,end_whitesapce);
         if(line_in.at(0) == '<'){
             // -------- Found a tag -------------
+            // Parse to determine open or closing tag and handle
             parseTag(scrapeDoc, tagStack, line_in);
         }else{
             // ----------Found inner HTML-----------
             if(!tagStack->empty()){
+                // Add the inner html to the current tag on the top of the stack
                 tagStack->top()->addInnerContent(line_in);
             }
         }
@@ -175,6 +177,17 @@ int main(int argc, char* argv[]){
         }else if(menuChoice == 4){
 
         }else if(menuChoice == 5){
+            cout << "Structure your request in the following format 'tag1.tag2~attr'\n";
+            cout << "Enter your request: ";
+            HtmlTag* request_tag = nullptr;
+            string find_attr;
+            cin >> find_attr;
+            while(find_attr.empty()){
+                cout << "Enter a non-empty request: ";
+                cin >> find_attr;
+            }
+            int delim_loc = find_attr.find_first_of(".~");
+            
 
         }else if(menuChoice == 6){
             cout << "Goodbye\n";
