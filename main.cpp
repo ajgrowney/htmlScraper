@@ -7,19 +7,9 @@
 #include <fstream>
 #include "HtmlDoc.hpp"
 #include "HtmlTag.hpp"
+#include "mainMenu.hpp"
 #include "functions.hpp"
 using namespace std;
-
-void printMenu(){
-        cout << "\nSelect a menu option\n";
-        cout << "1) View number of lines total\n";
-        cout << "2) View number of tags in document\n";
-        cout << "3) View all tags with information\n";
-        cout << "4) View specific element detail\n";
-        cout << "5) View specific attribute value\n";
-        cout << "6) Exit the program\n";
-        cout << "Select: ";
-}
 
 
 
@@ -95,11 +85,20 @@ int main(int argc, char* argv[]){
     Functions myFunctions;
     HtmlDoc* myDocument = new HtmlDoc();
     stack<HtmlTag*>* tagStack = new stack<HtmlTag*>();
+    MainMenu m;
+    m.insertOption(1,"hello");
+    m.insertOption(1, "View number of lines total");
+    m.insertOption(2, "View number of tags in document");
+    m.insertOption(3, "View all tags with information");
+    m.insertOption(4, "View specific element detail");
+    m.insertOption(5, "View specific attribute value");
+    m.insertOption(6, "Exit the program");
     string input;
 
     while(getline(myfile, input)){
         myFunctions.parseLine(myDocument, tagStack, input);
     }
+    myfile.close();
 
 
     /*
@@ -108,7 +107,8 @@ int main(int argc, char* argv[]){
     */
     int menuChoice = 0;
     while(menuChoice != 6){
-        printMenu();
+        m.display();
+        m.promptUser();
         cin.clear();
         cin >> menuChoice;
 
